@@ -4,12 +4,11 @@ import com.moimmee.gatheringservice.domain.party.domain.entity.PartyEntity
 import com.moimmee.gatheringservice.domain.party.domain.repository.PartyJpaRepository
 import com.moimmee.gatheringservice.domain.party.presentation.dto.request.CreatePartyRequest
 import com.moimmee.gatheringservice.infra.adapter.user.service.UserService
-import com.moimmee.gatheringservice.infra.grpc.user.UserServiceClient
 import com.moimmee.gatheringservice.infra.security.holder.ContextHolder
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class PartyService(
@@ -37,5 +36,4 @@ class PartyService(
 
         return savedParty.id
     }
-}
 }
