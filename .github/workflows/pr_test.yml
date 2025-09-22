@@ -16,8 +16,10 @@ jobs:
         ports:
           - 3306:3306
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
@@ -25,16 +27,19 @@ jobs:
           --health-retries=3
           
     env:
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      JPA_DDL_AUTO: ${{ secrets.DB_PASSWORD }}
+      DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
+      DB_USERNAME: testuser
+      DB_PASSWORD: testpass
+      JPA_DDL_AUTO: ${{ secrets.JPA_DDL_AUTO }}
       KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}
       KAFKA_CONSUMER_GROUP: ${{ secrets.KAFKA_CONSUMER_GROUP }}
       GRPC_USER_SERVICE_ADDRESS: ${{ secrets.GRPC_USER_SERVICE_ADDRESS }}
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
 
     steps:
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Checkout code
         uses: actions/checkout@v4
 
