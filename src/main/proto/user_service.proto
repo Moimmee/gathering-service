@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package user;
+
+option java_package = "com.moimmee.proto.user";
+option java_outer_classname = "UserServiceProto";
+
+// 사용자 서비스 정의
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+}
+
+// 메시지 정의
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string avatar_url = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+  bool success = 2;
+  string message = 3;
+}
