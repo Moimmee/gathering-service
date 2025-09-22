@@ -1,0 +1,123 @@
+# develop 브랜치 머지 시 쿠버네티스 배포
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+  APP_NAME: user-service  # 각 서비스별로 수정 필요
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Build application
+        run: ./gradlew build -x test
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify kubectl connection
+        run: |
+          kubectl cluster-info
+          kubectl get namespaces
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace ${{ secrets.K8S_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to Kubernetes
+        run: |
+          # deployment.yaml의 플레이스홀더 치환
+          sed -i "s|{{IMAGE_TAG}}|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
+          sed -i "s|{{DOCKERHUB_USERNAME}}|${{ secrets.DOCKER_USERNAME }}|g" k8s/deployment.yaml
+          sed -i "s|{{APP_NAME}}|${{ env.APP_NAME }}|g" k8s/deployment.yaml
+          
+          # 설정 파일들 확인
+          echo "=== Deployment YAML ==="
+          cat k8s/deployment.yaml
+          echo "======================="
+          
+          # 쿠버네티스 리소스 적용
+          kubectl apply -f k8s/ -n ${{ secrets.K8S_NAMESPACE }}
+          
+          # 배포 상태 확인
+          kubectl rollout status deployment/${{ env.APP_NAME }} -n ${{ secrets.K8S_NAMESPACE }} --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n ${{ secrets.K8S_NAMESPACE }} -l app=${{ env.APP_NAME }}
+          echo "=== Services ==="
+          kubectl get svc -n ${{ secrets.K8S_NAMESPACE }} -l app=${{ env.APP_NAME }}
+          echo "=== Recent Events ==="
+          kubectl get events -n ${{ secrets.K8S_NAMESPACE }} --sort-by='.lastTimestamp' | tail -10
+
+      - name: Discord notification
+        if: always()
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            ${{ job.status == 'success' && '✅' || '❌' }} **${{ env.APP_NAME }} Deployment ${{ job.status }}**
+            
+            **Repository:** ${{ github.repository }}
+            **Branch:** `${{ github.ref_name }}`
+            **Commit:** `${{ github.sha }}`
+            **Author:** ${{ github.actor }}
+            **Image:** `${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}`
+            **Namespace:** `${{ secrets.K8S_NAMESPACE }}`
+            
+            ${{ job.status == 'success' && '배포 성공' || '배포 실패' }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
