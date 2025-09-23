@@ -4,4 +4,5 @@ enum class PartyCategory {
     BOOK,
     HIKING,
     RUNNING,
+    GAME,
 }
