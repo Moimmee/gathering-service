@@ -40,3 +40,6 @@ out/
 .kotlin
 
 .env
+/grafana/volume/alerting/1/__default__.tmpl
+/grafana/volume/grafana.db
+/prometheus/config/query_log_file.log

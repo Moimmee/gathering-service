@@ -5,6 +5,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.jpa") version "1.9.10"
     id("com.google.protobuf") version "0.9.4"
+    kotlin("kapt") version "1.9.20"
 }
 
 group = "com.moimmee"
@@ -71,6 +72,19 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+    // QueryDSL
+    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    implementation("com.querydsl:querydsl-core:5.0.0")
+    kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    kapt("jakarta.annotation:jakarta.annotation-api")
+    kapt("jakarta.persistence:jakarta.persistence-api")
+
+    // docker compose 파일 실행하고 시작
+    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+
+    // swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 }
 
 kotlin {
@@ -104,6 +118,14 @@ protobuf {
             task.builtins {
                 create("kotlin")
             }
+        }
+    }
+}
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDirs("src/main/kotlin", "build/generated/source/kapt/main")
         }
     }
 }

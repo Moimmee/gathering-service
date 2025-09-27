@@ -3,6 +3,7 @@ package com.moimmee.gatheringservice.domain.party.application.service
 import com.moimmee.gatheringservice.domain.party.domain.entity.PartyEntity
 import com.moimmee.gatheringservice.domain.party.domain.enums.PartyCategory
 import com.moimmee.gatheringservice.domain.party.domain.repository.PartyJpaRepository
+import com.moimmee.gatheringservice.domain.party.domain.repository.PartyQueryRepository
 import com.moimmee.gatheringservice.domain.party.presentation.dto.request.CreatePartyRequest
 import com.moimmee.gatheringservice.domain.party.presentation.dto.response.PartyResponse
 import com.moimmee.gatheringservice.infra.adapter.user.service.UserService
@@ -18,7 +19,8 @@ import java.util.*
 class PartyService(
     private val partyJpaRepository: PartyJpaRepository,
     private val userService: UserService,
-    private val contextHolder: ContextHolder
+    private val contextHolder: ContextHolder,
+    private val partyQueryRepository: PartyQueryRepository
 ) {
     @Transactional
     fun createParty(request: CreatePartyRequest): UUID? {
@@ -36,7 +38,7 @@ class PartyService(
                 latitude = request.latitude,
                 longitude = request.longitude,
                 category = request.category,
-                limit = request.limit
+                limitMember = request.limitMember
             )
         )
 
@@ -45,7 +47,7 @@ class PartyService(
 
     @Transactional(readOnly = true)
     fun getParties(latitude: Double, longitude: Double, category: PartyCategory?): List<PartyResponse> {
-        return partyJpaRepository.findPartiesNear(
+        return partyQueryRepository.findNearbyParties(
             latitude = latitude,
             longitude = longitude,
             category = category,
@@ -53,6 +55,7 @@ class PartyService(
         ).map { it.toResponse() }
     }
 
+    @Transactional(readOnly = true)
     fun getParty(partyId: UUID): PartyResponse {
         return partyJpaRepository.findByIdOrNull(partyId)?.toResponse()
             ?: throw IllegalArgumentException("Party not found")
@@ -67,6 +70,6 @@ class PartyService(
         latitude = this.latitude,
         longitude = this.longitude,
         category = this.category,
-        limit = this.limit,
+        limit = this.limitMember,
     )
 }

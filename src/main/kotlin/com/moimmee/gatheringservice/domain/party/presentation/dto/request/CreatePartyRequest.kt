@@ -10,6 +10,6 @@ data class CreatePartyRequest(
     val endedAt: LocalDateTime,
     val latitude: Double,
     val longitude: Double,
-    val limit: Int? = null,
+    val limitMember: Int? = null,
     val category: PartyCategory
 )

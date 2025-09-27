@@ -46,6 +46,6 @@ data class PartyEntity(
     @Column(name = "updated_at", nullable = false)
     var updatedAt: LocalDateTime? = null,
 
-    @Column(name = "limit", nullable = true)
-    val limit: Int? = null,
+    @Column(name = "limit_member", nullable = true)
+    val limitMember: Int? = null,
 )
