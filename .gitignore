@@ -41,5 +41,8 @@ out/
 
 .env
 /grafana/volume/alerting/1/__default__.tmpl
-/grafana/volume/grafana.db
+/grafana/volume/**
+/grafana/volume
+/prometheus/volume
+/prometheus/volume/**
 /prometheus/config/query_log_file.log
