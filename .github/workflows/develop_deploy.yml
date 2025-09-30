@@ -61,8 +61,8 @@ jobs:
           chmod 600 key.pem
       
           # Deployment와 Service YAML만 서버로 복사
-          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-deployment.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/
-          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-service.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/
+          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-deployment.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/gathering-service
+          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-service.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/gathering-service
 
       - name: Deploy
         run: |
