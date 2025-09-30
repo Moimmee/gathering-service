@@ -54,8 +54,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Deploy
         run: |
@@ -64,12 +62,11 @@ jobs:
           
           # 시크릿 설치 (처음에만)
           ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-          "bash /home/deploy/setup-secrets.sh"
           
-          # 배포 실행
-          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-          "bash /home/deploy/deploy.sh ${{ env.APP_NAME }} ${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }} ${{ secrets.PROJECT_PATH }}"
-
+          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}
+          kubectl apply -f gathering-deployment.yaml
+          kubectl apply -f gathering-service.yaml
+          
           - uses: Ilshidur/action-discord@master
             if: always()
             with:
