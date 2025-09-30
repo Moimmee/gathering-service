@@ -71,7 +71,7 @@ jobs:
 
           # SSH 접속 후 Docker pull & Kubernetes 적용
           ssh -o StrictHostKeyChecking=no -i key.pem -p 1234 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-            cd /projects/moimmee/gathering-service
+            cd ~/projects/moimmee/gathering-service
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
             kubectl apply -f gathering-deployment.yaml
             kubectl apply -f gathering-service.yaml
