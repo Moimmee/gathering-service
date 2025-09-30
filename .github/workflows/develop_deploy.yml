@@ -73,6 +73,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i key.pem -p 1234 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd ~/projects/moimmee/gathering-service
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
+            kubectl apply -f gathering-config.yaml
+            kubectl apply -f gathering-secret.yaml
             kubectl apply -f gathering-deployment.yaml
             kubectl apply -f gathering-service.yaml
           EOF
