@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: gathering-deployment
+
+spec:
+  selector:
+    matchLabels:
+      app: gathering-app # 해당 label을 가진 pod를 배포할 것이라고 명시
+  replicas: 3
+
+  template: # 배포할 pod에 대한 정보
+    metadata:
+      labels:
+        app: gathering-app
+    spec:
+      containers:
+        - name: gathering-container
+          image: gathering-image
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080

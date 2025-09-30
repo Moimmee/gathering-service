@@ -1,5 +1,7 @@
 package com.moimmee.gatheringservice.domain.party.domain.entity
 
+import com.moimmee.gatheringservice.domain.party.domain.enums.PartyCategory
+import com.moimmee.gatheringservice.infra.common.entity.BaseEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.*
@@ -30,4 +32,11 @@ data class PartyEntity(
 
     @Column(name = "longitude", nullable = false)
     val longitude: Double,
-)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
+    val category: PartyCategory,
+
+    @Column(name = "limit_member", nullable = true)
+    val limitMember: Int? = null,
+) : BaseEntity()
