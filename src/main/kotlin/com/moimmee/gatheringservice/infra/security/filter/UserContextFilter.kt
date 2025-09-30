@@ -16,6 +16,12 @@ class UserContextFilter : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        val pathsToBypass = listOf("/swagger-ui", "/api-docs", "/v3/api-docs", "/swagger-resources", "/actuator")
+        if (pathsToBypass.any { request.requestURI.startsWith(it) }) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
         if ("true" != request.getHeader("X-Internal-Call")) {
             // 클라이언트 직접 접근 차단
             response.status = 403
@@ -29,5 +35,7 @@ class UserContextFilter : OncePerRequestFilter() {
         val authentication = UsernamePasswordAuthenticationToken(userId.toLong(), null, authorities)
 
         SecurityContextHolder.getContext().authentication = authentication
+
+        filterChain.doFilter(request, response)
     }
 }

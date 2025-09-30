@@ -1,9 +1,8 @@
 package com.moimmee.gatheringservice.domain.party.domain.entity
 
 import com.moimmee.gatheringservice.domain.party.domain.enums.PartyCategory
+import com.moimmee.gatheringservice.infra.common.entity.BaseEntity
 import jakarta.persistence.*
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -38,14 +37,6 @@ data class PartyEntity(
     @Column(name = "category", nullable = false)
     val category: PartyCategory,
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    var createdAt: LocalDateTime? = null,
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    var updatedAt: LocalDateTime? = null,
-
     @Column(name = "limit_member", nullable = true)
     val limitMember: Int? = null,
-)
+) : BaseEntity()
