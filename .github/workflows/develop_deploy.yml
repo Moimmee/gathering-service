@@ -55,6 +55,15 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
 
+      - name: Copy Kubernetes YAMLs to Server
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+      
+          # Deployment와 Service YAML만 서버로 복사
+          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-deployment.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/
+          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-service.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/
+
       - name: Deploy
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
