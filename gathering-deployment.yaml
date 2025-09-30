@@ -17,7 +17,12 @@ spec:
     spec:
       containers:
         - name: gathering-container
-          image: gathering-image
+          image: osoohynn3/gathering-image
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: gathering-config
+            - secretRef:
+                name: gathering-secret

@@ -8,7 +8,7 @@ on:
 
 env:
   IMAGE_TAG: ${{ github.sha }}
-  APP_NAME: user-service  # 각 서비스별로 수정 필요
+  APP_NAME: gathering-image
 
 jobs:
   build-and-deploy:
@@ -55,21 +55,34 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
 
+      - name: Copy Kubernetes YAMLs to Server
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+      
+          # Deployment와 Service YAML만 서버로 복사
+          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-deployment.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/gathering-service
+          scp -o StrictHostKeyChecking=no -i key.pem -P 1234 gathering-service.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/projects/moimmee/gathering-service
+
       - name: Deploy
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
-          
-          # 시크릿 설치 (처음에만)
-          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-          
-          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}
-          kubectl apply -f gathering-deployment.yaml
-          kubectl apply -f gathering-service.yaml
-          
-          - uses: Ilshidur/action-discord@master
-            if: always()
-            with:
-              args: ${{ job.status == 'success' && '✅ 배포 성공!' || '❌ 배포 실패!' }} ${{ env.APP_NAME }}
-            env:
-              DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+          # SSH 접속 후 Docker pull & Kubernetes 적용
+          ssh -o StrictHostKeyChecking=no -i key.pem -p 1234 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            cd ~/projects/moimmee/gathering-service
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
+            kubectl apply -f gathering-config.yaml
+            kubectl apply -f gathering-secret.yaml
+            kubectl apply -f gathering-deployment.yaml
+            kubectl apply -f gathering-service.yaml
+          EOF
+
+      - name: Notify Discord
+        if: always()
+        uses: Ilshidur/action-discord@master
+        with:
+          args: ${{ job.status == 'success' && '✅ 배포 성공!' || '❌ 배포 실패!' }} ${{ env.APP_NAME }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
