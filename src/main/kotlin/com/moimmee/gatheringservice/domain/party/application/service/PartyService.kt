@@ -2,11 +2,14 @@ package com.moimmee.gatheringservice.domain.party.application.service
 
 import com.moimmee.gatheringservice.domain.party.domain.entity.PartyEntity
 import com.moimmee.gatheringservice.domain.party.domain.enums.PartyCategory
+import com.moimmee.gatheringservice.domain.party.domain.error.PartyErrorCodeCode
 import com.moimmee.gatheringservice.domain.party.domain.repository.PartyJpaRepository
 import com.moimmee.gatheringservice.domain.party.domain.repository.PartyQueryRepository
 import com.moimmee.gatheringservice.domain.party.presentation.dto.request.CreatePartyRequest
 import com.moimmee.gatheringservice.domain.party.presentation.dto.response.PartyResponse
+import com.moimmee.gatheringservice.infra.adapter.user.domain.error.UserErrorCode
 import com.moimmee.gatheringservice.infra.adapter.user.service.UserService
+import com.moimmee.gatheringservice.infra.exception.CustomException
 import com.moimmee.gatheringservice.infra.security.holder.ContextHolder
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.repository.findByIdOrNull
@@ -26,7 +29,8 @@ class PartyService(
     fun createParty(request: CreatePartyRequest): UUID? {
         val userId = contextHolder.getCurrentUserId()
 
-        val user = runBlocking { userService.getUserById(userId) } ?: throw IllegalArgumentException("Can't find user")
+        val user = runBlocking { userService.getUserById(userId) }
+            ?: throw CustomException(UserErrorCode.USER_NOT_FOUND)
 
         val saved = partyJpaRepository.save(
             PartyEntity(
@@ -58,7 +62,7 @@ class PartyService(
     @Transactional(readOnly = true)
     fun getParty(partyId: UUID): PartyResponse {
         return partyJpaRepository.findByIdOrNull(partyId)?.toResponse()
-            ?: throw IllegalArgumentException("Party not found")
+            ?: throw CustomException(PartyErrorCodeCode.PARTY_NOT_FOUND)
     }
 
     private fun PartyEntity.toResponse() = PartyResponse(
