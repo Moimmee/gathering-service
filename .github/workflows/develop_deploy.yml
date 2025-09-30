@@ -8,7 +8,7 @@ on:
 
 env:
   IMAGE_TAG: ${{ github.sha }}
-  APP_NAME: gathering-service
+  APP_NAME: gathering-image
 
 jobs:
   build-and-deploy:
