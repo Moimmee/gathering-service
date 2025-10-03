@@ -68,5 +68,19 @@ services:
       - ./grafana/volume:/var/lib/grafana
     restart: always
 
+  mysql:
+    image: mysql:8.0
+    container_name: gathering-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # 필요에 따라 바꿔주세요
+      MYSQL_DATABASE: moimmee_gatherinmoimmee
+      MYSQL_PASSWORD: moimmee
+    ports:g_service
+      MYSQL_USER: 
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
 volumes:
   mysql_data:
