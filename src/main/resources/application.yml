@@ -31,7 +31,7 @@ spring:
 grpc:
   client:
     user-service:
-      address: static://localhost:9091
+      address: static://localhost:6565
       negotiationType: plaintext
 
 server:

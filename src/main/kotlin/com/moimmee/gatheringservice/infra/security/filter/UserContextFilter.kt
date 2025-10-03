@@ -1,5 +1,6 @@
 package com.moimmee.gatheringservice.infra.security.filter
 
+import com.moimmee.gatheringservice.logger
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -16,20 +17,24 @@ class UserContextFilter : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        val log = logger()
+
         val pathsToBypass = listOf("/swagger-ui", "/api-docs", "/v3/api-docs", "/swagger-resources", "/actuator")
         if (pathsToBypass.any { request.requestURI.startsWith(it) }) {
             filterChain.doFilter(request, response)
             return
         }
 
-        if ("true" != request.getHeader("X-Internal-Call")) {
-            // 클라이언트 직접 접근 차단
-            response.status = 403
-            return
-        }
+//        if ("true" != request.getHeader("X-Internal-Call")) {
+//            // 클라이언트 직접 접근 차단
+//            response.status = 403
+//            return
+//        }
 
         val userId = request.getHeader("X-User-Id")
         val role = request.getHeader("X-User-Role")
+
+        log.info(userId)
 
         val authorities = listOf(SimpleGrantedAuthority("ROLE_$role"))
         val authentication = UsernamePasswordAuthenticationToken(userId.toLong(), null, authorities)

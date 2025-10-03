@@ -60,14 +60,14 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.apache.kafka:kafka-streams")
 
-    // gRPC 관련 의존성
-    implementation("net.devh:grpc-spring-boot-starter:2.15.0.RELEASE")
+    // gRPC
+    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
+    implementation("io.grpc:grpc-stub:1.65.0")
+    implementation("io.grpc:grpc-kotlin-stub:1.4.1")
+    implementation("io.grpc:grpc-protobuf:1.65.0")
+    implementation("com.google.protobuf:protobuf-kotlin:3.25.3")
+    implementation("io.grpc:grpc-netty-shaded:1.65.0")
 
-    // Kotlin용 gRPC 의존성
-    implementation("io.grpc:grpc-stub:1.58.0")
-    implementation("io.grpc:grpc-kotlin-stub:1.4.0")
-    implementation("io.grpc:grpc-protobuf:1.58.0")
-    implementation("com.google.protobuf:protobuf-kotlin:3.24.4")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
@@ -99,14 +99,14 @@ tasks.withType<Test> {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.24.4"
+        artifact = "com.google.protobuf:protoc:3.25.3"
     }
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.58.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.65.0"
         }
         create("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.0:jdk8@jar"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar"
         }
     }
     generateProtoTasks {
@@ -122,10 +122,10 @@ protobuf {
     }
 }
 
-kotlin {
-    sourceSets {
-        main {
-            kotlin.srcDirs("src/main/kotlin", "build/generated/source/kapt/main")
-        }
+// Add generated sources to the main source set
+sourceSets {
+    main {
+        java.srcDirs("build/generated/source/proto/main/java")
+        kotlin.srcDirs("build/generated/source/proto/main/grpc", "build/generated/source/proto/main/grpckt", "build/generated/source/kapt/main")
     }
 }

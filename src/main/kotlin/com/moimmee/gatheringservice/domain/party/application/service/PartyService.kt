@@ -12,6 +12,7 @@ import com.moimmee.gatheringservice.infra.adapter.user.domain.error.UserErrorCod
 import com.moimmee.gatheringservice.infra.adapter.user.service.UserService
 import com.moimmee.gatheringservice.infra.exception.CustomException
 import com.moimmee.gatheringservice.infra.security.holder.ContextHolder
+import com.moimmee.gatheringservice.logger
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -26,9 +27,12 @@ class PartyService(
     private val contextHolder: ContextHolder,
     private val partyQueryRepository: PartyQueryRepository
 ) {
+    private val log = logger()
+
     @Transactional
     fun createParty(request: CreatePartyRequest): PartyCreatedResponse? {
         val userId = contextHolder.getCurrentUserId()
+        log.info(userId.toString())
 
         val user = runBlocking { userService.getUserById(userId) }
             ?: throw CustomException(UserErrorCode.USER_NOT_FOUND)
