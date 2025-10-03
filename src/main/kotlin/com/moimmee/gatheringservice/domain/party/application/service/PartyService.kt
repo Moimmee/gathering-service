@@ -6,6 +6,7 @@ import com.moimmee.gatheringservice.domain.party.domain.error.PartyErrorCodeCode
 import com.moimmee.gatheringservice.domain.party.domain.repository.PartyJpaRepository
 import com.moimmee.gatheringservice.domain.party.domain.repository.PartyQueryRepository
 import com.moimmee.gatheringservice.domain.party.presentation.dto.request.CreatePartyRequest
+import com.moimmee.gatheringservice.domain.party.presentation.dto.response.PartyCreatedResponse
 import com.moimmee.gatheringservice.domain.party.presentation.dto.response.PartyResponse
 import com.moimmee.gatheringservice.infra.adapter.user.domain.error.UserErrorCode
 import com.moimmee.gatheringservice.infra.adapter.user.service.UserService
@@ -26,7 +27,7 @@ class PartyService(
     private val partyQueryRepository: PartyQueryRepository
 ) {
     @Transactional
-    fun createParty(request: CreatePartyRequest): UUID? {
+    fun createParty(request: CreatePartyRequest): PartyCreatedResponse? {
         val userId = contextHolder.getCurrentUserId()
 
         val user = runBlocking { userService.getUserById(userId) }
@@ -46,7 +47,7 @@ class PartyService(
             )
         )
 
-        return saved.id
+        return PartyCreatedResponse(saved.id!!)
     }
 
     @Transactional(readOnly = true)

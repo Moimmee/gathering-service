@@ -1,9 +1,9 @@
 package com.moimmee.gatheringservice.infra.grpc.user
 
+import com.moimmee.gatheringservice.infra.adapter.user.domain.User
 import com.moimmee.gatheringservice.infra.adapter.user.service.UserService
 import com.moimmee.proto.user.UserServiceGrpcKt
 import com.moimmee.proto.user.UserServiceProto.GetUserRequest
-import com.moimmee.proto.user.UserServiceProto.User
 import net.devh.boot.grpc.client.inject.GrpcClient
 import org.springframework.stereotype.Component
 
@@ -12,24 +12,19 @@ class UserServiceClient : UserService {
     @GrpcClient("user-service")
     private lateinit var userServiceStub: UserServiceGrpcKt.UserServiceCoroutineStub
 
-    override suspend fun getUserById(userId: Long): UserResponse? {
+    override suspend fun getUserById(userId: Long): User? {
         val request = GetUserRequest.newBuilder()
-            .setUserId(userId.toString())
+            .setId(userId)
             .build()
 
         val response = userServiceStub.getUser(request)
-        return response.user.toResponse()
-    }
 
-    private suspend fun User.toResponse(): UserResponse {
-        return UserResponse(
-            id = this.id.toLong(),
-            username = this.name
+        return User(
+            id = userId,
+            name = response.name,
+            role = response.role,
+            gender = response.gender,
+            email = response.email
         )
     }
-
-    data class UserResponse(
-        val id: Long,
-        val username: String,
-    )
 }
