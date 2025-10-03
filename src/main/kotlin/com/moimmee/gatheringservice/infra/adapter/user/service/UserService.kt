@@ -1,7 +1,7 @@
 package com.moimmee.gatheringservice.infra.adapter.user.service
 
-import com.moimmee.gatheringservice.infra.grpc.user.UserServiceClient
+import com.moimmee.gatheringservice.infra.adapter.user.domain.User
 
 interface UserService {
-    suspend fun getUserById(userId: Long): UserServiceClient.UserResponse?
+    suspend fun getUserById(userId: Long): User?
 }
